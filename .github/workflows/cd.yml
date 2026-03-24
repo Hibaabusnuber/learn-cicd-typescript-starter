@@ -24,13 +24,19 @@ jobs:
       - name: Build app
         run: npm run build
 
+       # ✅ NEW: Authenticate with GCP (THIS FIXES YOUR ERROR)
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      # ✅ Setup gcloud (no auth here anymore)
       - name: Set up gcloud
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: notely-491205
-          service_account_key: ${{ secrets.GCP_CREDENTIALS }}
-          export_default_credentials: true
 
+      # ✅ Build & push Docker image
       - name: Build and push Docker image
         run: |
           gcloud builds submit \
