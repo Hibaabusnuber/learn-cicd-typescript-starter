@@ -8,6 +8,8 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     steps:
       - name: Check out code
@@ -24,7 +26,11 @@ jobs:
       - name: Build app
         run: npm run build
 
-       # ✅ NEW: Authenticate with GCP (THIS FIXES YOUR ERROR)
+      # ✅ Run database migrations before deployment
+      - name: Run database migrations
+        run: npm run db:migrate
+
+      # ✅ Authenticate with GCP
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
@@ -41,7 +47,8 @@ jobs:
         run: |
           gcloud builds submit \
             --tag us-central1-docker.pkg.dev/notely-491205/notely-ar-repo/notely:latest
-            
+
+      # ✅ Deploy to Cloud Run
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy notely \
